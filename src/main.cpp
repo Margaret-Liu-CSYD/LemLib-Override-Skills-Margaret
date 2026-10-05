@@ -69,9 +69,29 @@ void competition_initialize() {}
  */
 void autonomous() {
      // set position to x:0, y:0, heading:0
+
     chassis.setPose(0, 0, 0);
+    chassis.turnToHeading(180, 20000);
+
+    // // move 48" forwards
+    // chassis.moveToPoint(0, 24, 2000);
+
+    // turn 90 degrees to the right
+
     // move 48" forwards
-    chassis.turnToHeading(90, 100000);
+    // chassis.moveToPoint(24, 0, 20000);
+
+    // // turn 90 degrees to the right
+    // chassis.turnToHeading(180, 20000);
+    // chassis.waitUntilDone();
+    // // move 48" forwards
+    // chassis.moveToPoint(24, 0, 20000);
+
+    // // turn 90 degrees to the right
+    // chassis.turnToHeading(270, 20000);
+    // chassis.waitUntilDone();
+    // // move 48" forwards
+    // chassis.moveToPoint(0, 0, 10000);
 }
 
 /**

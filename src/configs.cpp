@@ -2,13 +2,13 @@
 #include "configs.h"
 
 pros::MotorGroup left_motor_group({-10, -8, -9}, pros::MotorGearset::blue); 
-pros::MotorGroup right_motor_group({1, 3, 2}, pros::MotorGearset::blue); 
+pros::MotorGroup right_motor_group({1, 2, 3}, pros::MotorGearset::blue); 
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&left_motor_group, // left motor group
                               &right_motor_group, // right motor group
                               10, // 10 inch track width
-                              lemlib::Omniwheel::NEW_325, // using new 4" omnis
+                              lemlib::Omniwheel::NEW_325, // using new 3.25" omnis
                               450, // drivetrain rpm is 450
                               2 // horizontal drift is 2 (for now)
 );
@@ -16,11 +16,11 @@ lemlib::Drivetrain drivetrain(&left_motor_group, // left motor group
 // imu
 pros::Imu imu(7);
 // horizontal tracking wheel encoder
-pros::Rotation horizontal_encoder(5);
+pros::Rotation horizontal_encoder(-14);
 // vertical tracking wheel encoder
 pros::Rotation vertical_encoder(-4);
 // horizontal tracking wheel
-lemlib::TrackingWheel horizontal_tracking_wheel(&horizontal_encoder, lemlib::Omniwheel::NEW_2, -5.75);
+lemlib::TrackingWheel horizontal_tracking_wheel(&horizontal_encoder, lemlib::Omniwheel::NEW_2, -3.5);
 // vertical tracking wheel
 lemlib::TrackingWheel vertical_tracking_wheel(&vertical_encoder, lemlib::Omniwheel::NEW_2, -.25);
 
@@ -45,9 +45,9 @@ lemlib::ControllerSettings lateral_controller(8, // proportional gain (kP)
 );
 
 // angular PID controller
-lemlib::ControllerSettings angular_controller(4, // proportional gain (kP)
+lemlib::ControllerSettings angular_controller(3, // proportional gain (kP)
                                               0, // integral gain (kI)
-                                              40, // derivative gain (kD)
+                                              25, // derivative gain (kD)
                                               3, // anti windup
                                               1, // small error range, in degrees
                                               100, // small error range timeout, in milliseconds
