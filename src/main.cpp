@@ -23,6 +23,7 @@ void on_center_button() {
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
+    printf("hello from the robot!\n");
     pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(); // calibrate sensors
     // print position to brain screen
@@ -33,7 +34,8 @@ void initialize() {
             pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
             pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
             // delay to save resources
-            pros::delay(20);
+            printf("X: %.2f  Y: %.2f  Theta: %.2f\n", chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta);
+            pros::delay(100);
         }
     });
 }
@@ -68,30 +70,55 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-     // set position to x:0, y:0, heading:0
-
+    //set position to x:0, y:0, heading:0
     chassis.setPose(0, 0, 0);
+    slide.move_absolute(720, 127);
+    
+    //going to red goal to score preload
+    chassis.moveToPose(18, 18,90, 2000,{.lead = 0.6,.earlyExitRange = 3});
+    chassis.waitUntilDone();
+    slide.move_absolute(0, 127);
+    claw.set_value(true);
+    pros::delay(500);
+
+    //backing out of red goal after scoring preload
+    chassis.moveToPose(10, 18, 90, 2000,{.forwards = false,.lead = 0.6,.minSpeed=20,.earlyExitRange = 3});
+    pros::lcd::print(3, "testt");
+    return;
+    // chassis.turnToHeading(90, 20000);
+    // chassis.waitUntilDone();
+    // chassis.turnToHeading(0, 20000);
+    // chassis.waitUntilDone();
+    // return;
+    printf("got here\n");
+    pros::delay(1000);
+    
+    chassis.moveToPoint(24, 24, 20000);
+    chassis.waitUntilDone();
+    return;
+    chassis.turnToHeading(90, 20000);
+    chassis.waitUntilDone();
+    printf("turn 90 degrees\n");
+    printf("X: %.2f  Y: %.2f  Theta: %.2f\n", chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta);
+    
+    chassis.moveToPose(48, 48, 90,20000);
+    chassis.waitUntilDone();
+    
     chassis.turnToHeading(180, 20000);
+    chassis.waitUntilDone();
+    printf("turn 180 degrees\n");
+    printf("X: %.2f  Y: %.2f  Theta: %.2f\n", chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta);
+    
+    chassis.moveToPose(48, 0, 180, 20000);
+    chassis.waitUntilDone();
+    chassis.turnToHeading(270, 20000);
 
-    // // move 48" forwards
-    // chassis.moveToPoint(0, 24, 2000);
-
-    // turn 90 degrees to the right
-
-    // move 48" forwards
-    // chassis.moveToPoint(24, 0, 20000);
-
-    // // turn 90 degrees to the right
-    // chassis.turnToHeading(180, 20000);
-    // chassis.waitUntilDone();
-    // // move 48" forwards
-    // chassis.moveToPoint(24, 0, 20000);
-
-    // // turn 90 degrees to the right
-    // chassis.turnToHeading(270, 20000);
-    // chassis.waitUntilDone();
-    // // move 48" forwards
-    // chassis.moveToPoint(0, 0, 10000);
+    printf("turn 270 degrees\n");
+    printf("X: %.2f  Y: %.2f  Theta: %.2f\n", chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta);
+    
+    chassis.waitUntilDone();
+    chassis.moveToPose(0, 0, 270, 20000);
+    chassis.waitUntilDone();
 }
 
 /**
@@ -111,15 +138,27 @@ pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 void opcontrol() {
     // loop forever
+    bool clawState = false;
+
     while (true) {
         // get left y and right x positions
         int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
-        // move the robot
+        // move the slide
         chassis.curvature(leftY, rightX);
-
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+            slide.move(127);    // Move lift up (max 127)
+        } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+            slide.move(-127);   // Move lift down
+        } else {
+            slide.move(0);      // Holds the lift position (if brake mode is set)
+        }
         // delay to save resources
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
+            clawState = !clawState; // Flip the logical state
+            claw.set_value(clawState);
+        }
         pros::delay(25);
     }
 }
