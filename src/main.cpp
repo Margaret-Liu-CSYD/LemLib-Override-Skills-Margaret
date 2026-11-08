@@ -71,13 +71,22 @@ void competition_initialize() {}
  */
 void autonomous() {
     //set position to x:0, y:0, heading:0
+    //toggling
     chassis.setPose(0, 0, 0);
-    slide.move_absolute(720, 127);
+    slide.move_absolute(600, 127);
+    chassis.turnToHeading(-40, 300);
+    chassis.moveToPoint(0, 10, 300,{.forwards=false});
+    chassis.setPose(0, 0, 0);
+    chassis.moveToPoint(0, 4, 300);
+    chassis.moveToPoint(0, 10, 300,{.forwards=false});
+    chassis.setPose(0, 0, 0);
     
     //going to red goal to score preload
     chassis.moveToPose(18, 18,90, 2000,{.lead = 0.6,.earlyExitRange = 3});
     chassis.waitUntilDone();
     slide.move_absolute(0, 127);
+    
+    pros::delay(500);
     claw.set_value(true);
     pros::delay(500);
 
