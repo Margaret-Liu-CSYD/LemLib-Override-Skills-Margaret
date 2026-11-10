@@ -59,6 +59,54 @@ void disabled() {}
 void competition_initialize() {}
 
 /**
+ * Drives toward a pin, slowing down as the distance sensor gets closer,
+ * then stops and closes the claw.
+ *
+ * targetHeading: heading (degrees) to hold while driving
+ * targetDist:    distance (mm) at which to stop and close the claw
+ * timeout:       give up after this many ms
+ */
+void grabPin(double targetHeading, double targetDist = 60, int timeout = 1500) {
+    const double kP = 0.25;          // speed per mm of distance left
+    const double kD = 0.7;           // damps the speed if closing in too fast
+    const double maxSpeed = 20;      // speed when the pin is far away
+    const double minSpeed = 12;      // lowest speed, so the robot doesn't stall
+    const double headingKP = 2.0;    // keeps the robot driving straight
+
+    double prevError = 0;
+    bool first = true;
+    int start = pros::millis();
+    while (pros::millis() - start < timeout) {
+        int d = distance_sensor.get();          // mm (9999 if nothing seen)
+        if (d <= 0 || d > 600) d = 600;         // nothing seen yet: treat as far away
+
+        double error = d - targetDist;
+        if (error <= 0) break;                  // reached the pin
+
+        double derivative = first ? 0 : error - prevError;
+        prevError = error;
+        first = false;
+
+        double speed = kP * error + kD * derivative;
+        if (speed > maxSpeed) speed = maxSpeed;
+        if (speed < minSpeed) speed = minSpeed;
+
+        double turn = headingKP * (targetHeading - chassis.getPose().theta);
+
+        left_motor_group.move(speed + turn);
+        right_motor_group.move(speed - turn);
+        pros::delay(10);
+    }
+    // Stop the drive before closing the claw so the pin isn't pushed over
+    left_motor_group.brake();
+    right_motor_group.brake();
+    claw.set_value(false); // close the claw
+    pros::delay(250);      
+    slide.move_absolute(360, 127); // lift the pin
+                         // let the claw grip
+}
+
+/**
  * Runs the user autonomous code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
  * the Field Management System or the VEX Competition Switch in the autonomous
@@ -71,27 +119,90 @@ void competition_initialize() {}
  */
 void autonomous() {
     //set position to x:0, y:0, heading:0
-    //toggling
+    //toggling.
     chassis.setPose(0, 0, 0);
-    slide.move_absolute(600, 127);
-    chassis.turnToHeading(-40, 300);
-    chassis.moveToPoint(0, 10, 300,{.forwards=false});
+
+    slide.move_absolute(500, 127);
+
+    chassis.turnToHeading(-40, 1000);
+    chassis.waitUntilDone();
+
     chassis.setPose(0, 0, 0);
-    chassis.moveToPoint(0, 4, 300);
-    chassis.moveToPoint(0, 10, 300,{.forwards=false});
-    chassis.setPose(0, 0, 0);
+    chassis.waitUntilDone();
+
+    chassis.moveToPoint(0, 2, 200);
+    chassis.waitUntilDone();
+
+    chassis.moveToPoint(0, -10, 300,{.forwards=false,.minSpeed=127});
+    chassis.waitUntilDone();
+    
+    chassis.moveToPoint(0, 2, 300);
+    chassis.moveToPoint(0, -10, 300,{.forwards=false,.minSpeed=127});
     
     //going to red goal to score preload
-    chassis.moveToPose(18, 18,90, 2000,{.lead = 0.6,.earlyExitRange = 3});
+    // No minSpeed, so the robot fully settles at the pose instead of exiting while still moving
+    chassis.moveToPose(18, 14.1, 90, 2000, {.lead = 0.4});
     chassis.waitUntilDone();
-    slide.move_absolute(0, 127);
-    
-    pros::delay(500);
-    claw.set_value(true);
-    pros::delay(500);
 
+    // Square up to 90 degrees so the push below is straight
+    chassis.turnToHeading(90, 250);
+    chassis.waitUntilDone();
+
+    // Push straight into the goal: aim at the current y so the robot drives along
+    // its heading instead of turning toward (19, 15). Slower speed = repeatable stop.
+    chassis.moveToPoint(25, chassis.getPose().y, 300);
+    chassis.waitUntilDone();
+    
+    chassis.setPose(17.3, 14.8,chassis.getPose().theta); // reset position to the center of the goal
+    chassis.waitUntilDone();
+    
+    slide.move_absolute(0, 127);
+    pros::delay(100);
+
+    claw.set_value(true);
+    pros::delay(200);
+    
     //backing out of red goal after scoring preload
-    chassis.moveToPose(10, 18, 90, 2000,{.forwards = false,.lead = 0.6,.minSpeed=20,.earlyExitRange = 3});
+    chassis.moveToPoint(1, 15, 2000,{.forwards = false});
+    chassis.waitUntilDone();
+
+    // Face the pin. From (0, 15) to (17.4, 42.08) the heading is about 32.7°, not 37.8°
+    chassis.turnToHeading(48, 1000);
+    chassis.waitUntilDone();
+
+    // 1. Drive fast to a point about 6" before the pin
+    chassis.moveToPose(19.3, 32.1, 48,1500,{.maxSpeed=50,.minSpeed=10});
+    chassis.waitUntilDone();
+    
+    // 2. Drive toward the pin, slowing down as the distance sensor gets closer
+    grabPin(48,60);
+
+
+    // Only lift once the pin is gripped
+    slide.move_absolute(3*360, 127);
+    
+    chassis.moveToPoint(28, 39, 1500, {.maxSpeed = 50});
+
+
+    chassis.turnToHeading(180, 500);
+    chassis.waitUntilDone();
+
+    chassis.moveToPose(28, 21, 180, 1000);
+    chassis.waitUntilDone();
+
+    slide.move_absolute(0, 127);
+    claw.set_value(true);
+
+    pros::delay(200);
+
+    chassis.turnToHeading(180, 300);
+    chassis.waitUntilDone();
+
+    chassis.moveToPose(28, 40, 180, 1000,{.forwards=false});
+    chassis.waitUntilDone();
+
+    chassis.turnToHeading(135, 300);
+    chassis.waitUntilDone();
     pros::lcd::print(3, "testt");
     return;
     // chassis.turnToHeading(90, 20000);
@@ -148,26 +259,23 @@ pros::Controller controller(pros::E_CONTROLLER_MASTER);
 void opcontrol() {
     // loop forever
     bool clawState = false;
-
     while (true) {
         // get left y and right x positions
         int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
-
-        // move the slide
         chassis.curvature(leftY, rightX);
+        // move the slide
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-            slide.move(127);    // Move lift up (max 127)
+            slide.move(127);    // Move lift up when pressed
         } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-            slide.move(-127);   // Move lift down
+            slide.move(-127);   // Move lift down pressed
         } else {
-            slide.move(0);      // Holds the lift position (if brake mode is set)
+            slide.move(0);      // Holds the lift position when nothing is pressed
         }
-        // delay to save resources
         if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
-            clawState = !clawState; // Flip the logical state
+            clawState = !clawState; // Flip the logical state so that claw state becomes opposite every L1 press
             claw.set_value(clawState);
         }
-        pros::delay(25);
+        pros::delay(25); // delay to prevent overloading
     }
 }

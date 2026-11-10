@@ -18,6 +18,7 @@ pros::adi::DigitalOut claw('A');
 
 // imu
 pros::Imu imu(7);
+pros::Distance distance_sensor(13);
 // horizontal tracking wheel encoder
 pros::Rotation horizontal_encoder(-14);
 // vertical tracking wheel encoder
@@ -36,21 +37,21 @@ lemlib::OdomSensors sensors(&vertical_tracking_wheel, // vertical tracking wheel
 );
 
 // lateral PID controller
-lemlib::ControllerSettings lateral_controller(15, // proportional gain (kP)
+lemlib::ControllerSettings lateral_controller(10, // proportional gain (kP)
                                               0, // integral gain (kI)
-                                              55, // derivative gain (kD)
+                                              45, // derivative gain (kD)
                                               3, // anti windup
                                               1, // small error range, in inches
                                               100, // small error range timeout, in milliseconds
-                                              3, // large error range, in inches
+                                              2, // large error range, in inches
                                               500, // large error range timeout, in milliseconds
                                               20 // maximum acceleration (slew)
 );
 
 // angular PID controller
-lemlib::ControllerSettings angular_controller(4, // proportional gain (kP)
+lemlib::ControllerSettings angular_controller(3, // proportional gain (kP)
                                               0, // integral gain (kI)
-                                              30, // derivative gain (kD)
+                                              20, // derivative gain (kD)
                                               3, // anti windup
                                               1, // small error range, in degrees
                                               100, // small error range timeout, in milliseconds
