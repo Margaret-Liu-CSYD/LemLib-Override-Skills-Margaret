@@ -239,11 +239,12 @@ void autonomous() {
     chassis.waitUntilDone();
     //return here for 15second auto!!!
 
+    /*loader first pin*/
     //going towards loader to grab first pin
     chassis.moveToPose(64, 13, 270, 1500,{.forwards=false,.minSpeed=40});
     chassis.waitUntilDone();
     
-    /*loader first pin*/
+    
     slide.move_absolute(0, 127);
     chassis.turnToHeading(180, 400,{.maxSpeed=50});
     chassis.waitUntilDone();
@@ -278,42 +279,79 @@ void autonomous() {
     claw.set_value(true);
     pros::delay(100);
     chassis.waitUntilDone();
+
+    /*loader second pin*/
+    //going towards loader to grab second pin
+    chassis.moveToPose(64, 13, 270, 1500,{.forwards=false,.minSpeed=40});
+    chassis.waitUntilDone();
+    
+    
+    slide.move_absolute(0, 127);
+    chassis.turnToHeading(180, 400,{.maxSpeed=50});
+    chassis.waitUntilDone();
+
+    //alligning with loader and grabbing second pin from loader
+    chassis.moveToPose(65, -3, 180, 1000);
+    chassis.waitUntilDone();
+
+    claw.set_value(false);
+    pros::delay(200);
+
+    //allign with red goal to score second loader pin
+    chassis.moveToPose(64, 13, 180, 1000,{.forwards=false});
+    chassis.waitUntilDone();
+
+    slide.move_absolute(7*360, 127);
+    pros::delay(200);
+
+    //turn to face red goal to score second loader pin
+    chassis.turnToHeading(270, 400,{.maxSpeed=50});
+    chassis.waitUntilDone();
+
+    //scoring second loader pin
+    chassis.moveToPose(30, 12, 270, 1500);
+    chassis.waitUntilDone();
+
+    chassis.setPose(40, 13, chassis.getPose().theta);
+    chassis.waitUntilDone();
+
+    slide.move_absolute(3*360, 70);
+    pros::delay(700);
+    claw.set_value(true);
+    pros::delay(100);
+    chassis.waitUntilDone();
+
+    /*loader singular pin to score on second goal*/
+    //going towards loader to grab singular pin
+    chassis.moveToPose(64, 13, 270, 1500,{.forwards=false,.minSpeed=40});
+    chassis.waitUntilDone();
+    
+    
+    slide.move_absolute(0, 127);
+    chassis.turnToHeading(180, 400,{.maxSpeed=50});
+    chassis.waitUntilDone();
+
+    //alligning with loader and grabbing second pin from loader
+    chassis.moveToPose(65, -3, 180, 1000);
+    chassis.waitUntilDone();
+
+    claw.set_value(false);
+    pros::delay(200);
+
+    //allign with red goal to score second loader pin
+    chassis.moveToPose(64, 13, 180, 1000,{.forwards=false});
+    chassis.waitUntilDone();
+
+    //face second red goal to score singular loader pin
+    chassis.turnToHeading(320, 400,{.maxSpeed=50});
+    chassis.waitUntilDone();
+
+    //go to second red goal to score singular loader pin
+    chassis.moveToPose(50, 40, 0, 1000);//untested
+    chassis.waitUntilDone();
     pros::lcd::print(3, "testt");
     return;
-    // chassis.turnToHeading(90, 20000);
-    // chassis.waitUntilDone();
-    // chassis.turnToHeading(0, 20000);
-    // chassis.waitUntilDone();
-    // return;
-    printf("got here\n");
-    pros::delay(1000);
     
-    chassis.moveToPoint(24, 24, 20000);
-    chassis.waitUntilDone();
-    return;
-    chassis.turnToHeading(90, 20000);
-    chassis.waitUntilDone();
-    printf("turn 90 degrees\n");
-    printf("X: %.2f  Y: %.2f  Theta: %.2f\n", chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta);
-    
-    chassis.moveToPose(48, 48, 90,20000);
-    chassis.waitUntilDone();
-    
-    chassis.turnToHeading(180, 20000);
-    chassis.waitUntilDone();
-    printf("turn 180 degrees\n");
-    printf("X: %.2f  Y: %.2f  Theta: %.2f\n", chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta);
-    
-    chassis.moveToPose(48, 0, 180, 20000);
-    chassis.waitUntilDone();
-    chassis.turnToHeading(270, 20000);
-
-    printf("turn 270 degrees\n");
-    printf("X: %.2f  Y: %.2f  Theta: %.2f\n", chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta);
-    
-    chassis.waitUntilDone();
-    chassis.moveToPose(0, 0, 270, 20000);
-    chassis.waitUntilDone();
 }
 
 /**
