@@ -20,7 +20,7 @@ pros::adi::DigitalOut claw('A');
 pros::Imu imu(7);
 pros::Distance distance_sensor(13);
 // horizontal tracking wheel encoder
-pros::Rotation horizontal_encoder(-14);
+pros::Rotation horizontal_encoder(-15);
 // vertical tracking wheel encoder
 pros::Rotation vertical_encoder(11);
 // horizontal tracking wheel
@@ -51,7 +51,7 @@ lemlib::ControllerSettings lateral_controller(10, // proportional gain (kP)
 // angular PID controller
 lemlib::ControllerSettings angular_controller(3, // proportional gain (kP)
                                               0, // integral gain (kI)
-                                              25, // derivative gain (kD)
+                                              27, // derivative gain (kD)
                                               3, // anti windup
                                               1, // small error range, in degrees
                                               100, // small error range timeout, in milliseconds
