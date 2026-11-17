@@ -69,7 +69,7 @@ void competition_initialize() {}
 void grabPin(double targetHeading, double targetDist = 60, int timeout = 1500) {
     const double kP = 0.25;          // speed per mm of distance left
     const double kD = 0.7;           // damps the speed if closing in too fast
-    const double maxSpeed = 20;      // speed when the pin is far away
+    const double maxSpeed = 25;      // speed when the pin is far away
     const double minSpeed = 12;      // lowest speed, so the robot doesn't stall
     const double headingKP = 2.0;    // keeps the robot driving straight
 
@@ -124,7 +124,7 @@ void autonomous() {
     chassis.setPose(0, 0, 0);
 
 
-    slide.move_absolute(500, 127);
+    slide.move_absolute(700, 127);
     //first toggle
     chassis.turnToHeading(-40, 600);
     chassis.waitUntilDone();
@@ -135,72 +135,72 @@ void autonomous() {
     chassis.moveToPoint(0, 2, 200);
     chassis.waitUntilDone();
     //second toggle
-    chassis.moveToPoint(0, -10, 300,{.forwards=false,.minSpeed=127});
+    chassis.moveToPoint(0, -10, 270,{.forwards=false,.minSpeed=127});
     chassis.waitUntilDone();
     
     chassis.moveToPoint(0, 2, 300);
-    chassis.moveToPoint(0, -10, 300,{.forwards=false,.minSpeed=127});
+    chassis.moveToPoint(0, -10, 270,{.forwards=false,.minSpeed=127});
     
     /*going to red goal to score preload*/
     // No minSpeed, so the robot fully settles at the pose instead of exiting while still moving
-    chassis.moveToPose(20, 14, 90, 1500, {.lead = 0.4});
+    chassis.moveToPose(23, 14.8, 90, 1600, {.lead = 0.35,.maxSpeed=70});
     chassis.waitUntilDone();
 
-    // Square up to 90 degrees so the push below is straight
-    chassis.turnToHeading(90, 250);
-    chassis.waitUntilDone();
+    // // Square up to 90 degrees so the push below is straight
+    // chassis.turnToHeading(90, 250);
+    // chassis.waitUntilDone();
 
-    // Push straight into the goal: aim at the current y so the robot drives along
-    // its heading instead of turning toward (19, 15). Slower speed = repeatable stop.
-    chassis.moveToPoint(25, chassis.getPose().y, 200);
-    chassis.waitUntilDone();
+    // // Push straight into the goal: aim at the current y so the robot drives along
+    // // its heading instead of turning toward (19, 15). Slower speed = repeatable stop.
+    // chassis.moveToPoint(25, chassis.getPose().y, 200);
+    // chassis.waitUntilDone();
     
     chassis.setPose(17.3, 14.8,chassis.getPose().theta); // reset position to the center of the goal
     chassis.waitUntilDone();
     
     //scoring preload
     slide.move_absolute(0, 127);
-    pros::delay(100);
+    pros::delay(150);
 
     claw.set_value(true);
     pros::delay(200);
     
     //backing out of red goal after scoring preload
-    chassis.moveToPoint(1, 15, 2000,{.forwards = false});
+    chassis.moveToPoint(10, 15, 1500,{.forwards = false,.minSpeed=10});
     chassis.waitUntilDone();
-
+    return;
     /*first ground pin*/
     // Face the pin. From (0, 15) to (17.4, 42.08) the heading is about 32.7°, not 37.8°
     chassis.turnToHeading(48, 500);
     chassis.waitUntilDone();
-
+    
     // Drive fast to a point about 6" before the pin
-    chassis.moveToPose(18.1, 32.1, 48,2000,{.maxSpeed=60,.minSpeed=10});
+    chassis.moveToPoint(19, 32.9,2000,{.maxSpeed=60,.minSpeed=10});
     chassis.waitUntilDone();
     
     // Drive toward the first ground pin, slowing down as the distance sensor gets closer
-    grabPin(48,60);
-
+    grabPin(48,55);
+    
 
     // Only lift once the pin is gripped
     slide.move_absolute(3*360, 127);
     
-    chassis.moveToPoint(25, 39, 1500, {.maxSpeed = 50});
+    chassis.moveToPoint(25, 39, 700);
 
     //scoring first ground pin
-    chassis.turnToHeading(180, 1000,{.maxSpeed=50});
+    chassis.turnToHeading(180, 600);
     chassis.waitUntilDone();
 
-    chassis.moveToPose(29, 11, 180, 1700);
+    chassis.moveToPose(25.5, 15, 180, 1200);
     chassis.waitUntilDone();
 
     slide.move_absolute(0, 80);
     pros::delay(350);
     claw.set_value(true);
-    
+    return;
     /*second ground pin*/
     pros::delay(200);
-    chassis.setPose(30,21.6,chassis.getPose().theta);
+    chassis.setPose(25,22.6,chassis.getPose().theta);
     chassis.waitUntilDone();
 
     chassis.turnToHeading(180, 1000,{.maxSpeed=50});
@@ -227,7 +227,7 @@ void autonomous() {
     slide.move_absolute(5*360, 127);
     pros::delay(300);
     //going to goal
-    chassis.moveToPose(30, 12, 270, 1700);
+    chassis.moveToPose(30, 12, 270, 1500);
     chassis.waitUntilDone();
 
     chassis.setPose(40, 13, chassis.getPose().theta);
@@ -245,23 +245,23 @@ void autonomous() {
 
     /*loader first pin*/
     //going towards loader to grab first pin
-    chassis.moveToPose(69, 13, 270, 1800,{.forwards=false,.minSpeed=40});
+    chassis.moveToPose(67, 13, 270, 1700,{.forwards=false});
     chassis.waitUntilDone();
     
     
     slide.move_absolute(0, 127);
-    chassis.turnToHeading(180, 400,{.maxSpeed=50});
+    chassis.turnToHeading(180, 1000,{.maxSpeed=50});
     chassis.waitUntilDone();
 
     //alligning with loader and grabbing first pin from loader
-    chassis.moveToPose(69, -4, 180, 1400);
+    chassis.moveToPoint(67, -4, 1300);
     chassis.waitUntilDone();
 
     claw.set_value(false);
     pros::delay(200);
     slide.move_absolute(0.5*360, 70);
     //allign with red goal to score first loader pin
-    chassis.moveToPose(69, 13, 180, 1000,{.forwards=false});
+    chassis.moveToPose(67, 13, 180, 1000,{.forwards=false});
     chassis.waitUntilDone();
 
     slide.move_absolute(6*360, 127);
@@ -272,7 +272,7 @@ void autonomous() {
     chassis.waitUntilDone();
 
     //scoring first loader pin
-    chassis.moveToPose(30, 12, 270, 1500);
+    chassis.moveToPose(30, 12, 270, 1400);
     chassis.waitUntilDone();
 
     chassis.setPose(40, 13, chassis.getPose().theta);
@@ -286,16 +286,16 @@ void autonomous() {
     
     /*loader second pin*/ 
     //going towards loader to grab second pin
-    chassis.moveToPose(69, 13, 270, 1500,{.forwards=false,.minSpeed=40});
+    chassis.moveToPose(67, 13, 270, 1400,{.forwards=false});
     chassis.waitUntilDone();
     
     
     slide.move_absolute(0, 127);
-    chassis.turnToHeading(180, 400,{.maxSpeed=50});
+    chassis.turnToHeading(180, 1400,{.maxSpeed=50});
     chassis.waitUntilDone();
 
     //alligning with loader and grabbing second pin from loader
-    chassis.moveToPose(69, -4, 178, 1400);
+    chassis.moveToPoint(67, -4, 1300);
     chassis.waitUntilDone();
 
     claw.set_value(false);
@@ -303,7 +303,7 @@ void autonomous() {
     slide.move_absolute(0.5*360, 70);
 
     //allign with red goal to score second loader pin
-    chassis.moveToPose(69, 13, 180, 1000,{.forwards=false});
+    chassis.moveToPose(67, 13, 180, 1000,{.forwards=false});
     chassis.waitUntilDone();
 
     slide.move_absolute(7*360, 127);
@@ -325,37 +325,37 @@ void autonomous() {
     claw.set_value(true);
     pros::delay(100);
     chassis.waitUntilDone();
-    return;
+    
     /*loader singular pin to score on second goal*/
     //going towards loader to grab singular pin
-    chassis.moveToPose(69, 13, 270, 1500,{.forwards=false,.minSpeed=40});
+    chassis.moveToPose(67, 13, 270, 1500,{.forwards=false});
     chassis.waitUntilDone();
     
     
     slide.move_absolute(0, 127);
-    chassis.turnToHeading(180, 400,{.maxSpeed=50});
+    chassis.turnToHeading(180, 1000,{.maxSpeed=50});
     chassis.waitUntilDone();
 
     //alligning with loader and grabbing singular pin from loader
-    chassis.moveToPose(69, -3, 180, 1000);
+    chassis.moveToPoint(67, -4, 1300);
     chassis.waitUntilDone();
 
     claw.set_value(false);
     pros::delay(200);
 
     //allign with red goal to score singular loader pin
-    chassis.moveToPose(69, 13, 180, 1000,{.forwards=false});
+    chassis.moveToPose(67, 13, 180, 1000,{.forwards=false});
     chassis.waitUntilDone();
     slide.move_absolute(2*360, 127);
     //face second red goal to score singular loader pin
-    chassis.turnToHeading(320, 400,{.maxSpeed=50});
+    chassis.turnToHeading(320, 1000,{.maxSpeed=50});
     chassis.waitUntilDone();
 
     //go to second red goal to score singular loader pin
     chassis.moveToPose(53, 45, 0, 1700);
     chassis.waitUntilDone();
 
-    chassis.turnToHeading(0, 400);
+    chassis.turnToHeading(0, 1000);
     chassis.waitUntilDone();
 
     chassis.moveToPoint(53, 34, 500);
@@ -366,42 +366,44 @@ void autonomous() {
     claw.set_value(true);
     pros::delay(200);
     
-    /*third loader pin*/
-    chassis.moveToPose(69, 13, 0, 1000,{.forwards=false});
-    chassis.waitUntilDone();
+    // /*third loader pin*/
+    // chassis.moveToPose(69, 13, 0, 1000,{.forwards=false});
+    // chassis.waitUntilDone();
 
-    chassis.turnToHeading(180, 400);
-    chassis.waitUntilDone();
+    // chassis.turnToHeading(180, 1000);
+    // chassis.waitUntilDone();
     
-    chassis.moveToPose(69, -4, 180, 1400);
-    chassis.waitUntilDone();
+    // chassis.moveToPose(69, -4, 180, 1300);
+    // chassis.waitUntilDone();
 
     
-    claw.set_value(false);
-    pros::delay(200);
+    // claw.set_value(false);
+    // pros::delay(200);
 
-    //allign with red goal to score third loader pin
-    chassis.moveToPose(69, 13, 180, 1000,{.forwards=false});
-    chassis.waitUntilDone();
-    slide.move_absolute(2*360, 127);
-    //face second red goal to score third loader pin
-    chassis.turnToHeading(320, 400,{.maxSpeed=50});
-    chassis.waitUntilDone();
+    // //allign with red goal to score third loader pin
+    // chassis.moveToPose(69, 13, 180, 1000,{.forwards=false});
+    // chassis.waitUntilDone();
+    // slide.move_absolute(2*360, 127);
+    // //face second red goal to score third loader pin
+    // chassis.turnToHeading(320, 1000,{.maxSpeed=50});
+    // chassis.waitUntilDone();
 
-    //go to second red goal to score third loader pin
-    chassis.moveToPose(53, 45, 0, 1700);
-    chassis.waitUntilDone();
+    // //go to second red goal to score third loader pin
+    // chassis.moveToPose(53, 45, 0, 1700);
+    // chassis.waitUntilDone();
 
-    chassis.turnToHeading(0, 400);
-    chassis.waitUntilDone();
+    // chassis.turnToHeading(0, 1000);
+    // chassis.waitUntilDone();
 
-    chassis.moveToPoint(53, 34, 500);
-    chassis.waitUntilDone();
+    // chassis.moveToPoint(53, 34, 500);
+    // chassis.waitUntilDone();
 
-    //scoring third loader pin
-    slide.move_absolute(0, 80);
-    claw.set_value(true);
-    pros::delay(200);
+    // //scoring third loader pin
+    // slide.move_absolute(0, 80);
+    // claw.set_value(true);
+
+    
+    // pros::delay(200);
 
     // /*fourth loader pin*/
     // chassis.moveToPose(64, 13, 0, 1000,{.forwards=false});
@@ -450,6 +452,21 @@ void autonomous() {
     chassis.waitUntilDone();
 
     chassis.turnToHeading(270, 500);
+    chassis.waitUntilDone();
+
+    chassis.moveToPose(50, 66, 270, 2000,{.forwards=false,.minSpeed=20});
+    chassis.waitUntilDone();
+
+    chassis.moveToPose(80, 66, 270, 1000,{.forwards=false});
+    chassis.waitUntilDone();
+
+    chassis.moveToPose(50, 66, 270, 700);
+    chassis.waitUntilDone();
+
+    chassis.moveToPose(80, 66, 270, 1000,{.forwards=false});
+    chassis.waitUntilDone();
+
+    chassis.moveToPose(0, 66, 270, 700,{.minSpeed=90});
     chassis.waitUntilDone();
 
 
